@@ -26,7 +26,8 @@
     "dependencies" : {
         "http-duplex" : "~0.0.2",
         "inherits" : "~1.0.0",
-        "mkdirp" : "~0.3.4"
+        "mkdirp" : "~0.3.4",
+        "event-stream" : "~3.0.9"
     },
     "devDependencies" : {
         "tap" : "~0.2.5",
