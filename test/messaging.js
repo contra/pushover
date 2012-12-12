@@ -21,7 +21,7 @@ test('create, push to, and clone a repo with messages', function (t) {
     fs.mkdirSync(srcDir, 0700);
     fs.mkdirSync(dstDir, 0700);
     
-    var repos = pushover(repoDir, {keepOpen:true});
+    var repos = pushover(repoDir);
     var port = Math.floor(Math.random() * ((1<<16) - 1e4)) + 1e4;
     var server = http.createServer(function (req, res) {
         repos.handle(req, res);
@@ -52,19 +52,21 @@ test('create, push to, and clone a repo with messages', function (t) {
 
             var expected = ["test1","test2","test3"];
             var unexpected = ["test4"];
+            var buf = "";
             ps.stderr.on('data', function(data){
-              expected.forEach(function(msg){
-                var idx = String(data).indexOf(msg);
-                t.ok(idx > -1, 'expected message received');
-              });
-              unexpected.forEach(function(msg){
-                var idx = String(data).indexOf(msg);
-                t.ok(idx == -1, 'unexpected message received');
-              });
+                buf += String(data);
             });
 
             ps.on('exit', function(){
-              next();
+                expected.forEach(function(msg){
+                    var idx = buf.indexOf(msg);
+                    t.ok(idx > -1, msg + ' expected message received');
+                });
+                unexpected.forEach(function(msg){
+                    var idx = buf.indexOf(msg);
+                    t.ok(idx == -1, 'unexpected message received');
+                });
+                next();
             });
         })
         .seq(function () {
@@ -87,13 +89,14 @@ test('create, push to, and clone a repo with messages', function (t) {
     
     repos.on('push', function (push) {
         t.equal(push.repo, 'doom');
-        push.message('test1');
+        push.keepOpen = true;
+        push.message('test1\r\n');
         push.accept();
-        push.message('test2');
-        process.nextTick(function(){
-          push.message('test3');
+        push.message('test2\r\n');
+        setTimeout(function(){
+          push.message('test3\r\n');
           push.done();
-          push.message('test4');
-        });
+          push.message('test4\r\n');
+        }, 1000);
     });
 });
