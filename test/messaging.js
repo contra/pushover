@@ -52,6 +52,7 @@ test('create, push to, and clone a repo with messages', function (t) {
 
             var expected = ["test1","test2","test3"];
             var unexpected = ["test4"];
+
             var buf = "";
             ps.stderr.on('data', function(data){
                 buf += String(data);
@@ -89,14 +90,13 @@ test('create, push to, and clone a repo with messages', function (t) {
     
     repos.on('push', function (push) {
         t.equal(push.repo, 'doom');
-        push.keepOpen = true;
+        push.accept(true);
         push.message('test1\r\n');
-        push.accept();
         push.message('test2\r\n');
         setTimeout(function(){
-          push.message('test3\r\n');
-          push.done();
-          push.message('test4\r\n');
-        }, 1000);
+            push.message('test3\r\n');
+            push.done();
+            push.message('test4\r\n');
+        }, 500);
     });
 });
